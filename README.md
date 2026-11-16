@@ -26,9 +26,11 @@ El proyecto está estructurado en varios archivos independientes para aislar los
 ## 📋 Requisitos e Instalación
 
 <p align="left">
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" width="45" height="45" alt="Python" style="background: transparent;" />
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" height="40" alt="Python" />
   &nbsp;&nbsp;
-  <img src="https://ollama.com/public/ollama.png" width="45" height="45" alt="Ollama" style="background: transparent;" />
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/windows8/windows8-original.svg" height="40" alt="Windows" />
+  &nbsp;&nbsp;
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/ollama/ollama-original.svg" height="40" alt="Ollama" />
 </p>
 
 1. Tener instalado **Python** y **Ollama** corriendo localmente (`http://localhost:11434`) con el modelo `qwen2.5-coder:7b`.
