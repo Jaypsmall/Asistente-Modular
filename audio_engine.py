@@ -28,7 +28,6 @@ class MotorAudio:
         if not self.model:
             return ""
         try:
-            # Captura audio del micro
             grabacion = sd.rec(int(duracion * self.fs), samplerate=self.fs, channels=1, dtype="int16")
             sd.wait()
 
