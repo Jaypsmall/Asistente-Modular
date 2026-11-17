@@ -1,4 +1,4 @@
-# 🛠️ Taller Central - Asistente Modular Offline (Windows) 
+# 🛠️ Taller Central - Asistente Modular Offline (Windows)  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/windows8/windows8-original.svg" height="60" alt="Windows" />
 
 Asistente de escritorio modular, 100% offline y diseñado para entornos de desarrollo de alto rendimiento en Windows (optimizado para equipos con 16 GB de RAM), utilizando modelos locales para mantener total privacidad y escapar de bloqueos de API en la nube.
 
