@@ -16,11 +16,11 @@ Asistente de escritorio modular, 100% offline y diseñado para entornos de desar
 </table>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
-  <img src="https://img.shields.io/badge/CustomTkinter-UI-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="CustomTkinter">
-  <img src="https://img.shields.io/badge/Ollama-Local_AI-121212?style=for-the-badge&logo=ollama&logoColor=white" alt="Ollama">
-  <img src="https://img.shields.io/badge/Vosk-Speech_Offline-FF6F00?style=for-the-badge&logo=speaker&logoColor=white" alt="Vosk">
-  <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License MIT">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-1E1E2E?style=for-the-badge&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/Windows-10%2F11-1E1E2E?style=for-the-badge&logo=windows11" alt="Windows">
+  <img src="https://img.shields.io/badge/Ollama-Local_AI-1E1E2E?style=for-the-badge&logo=ollama&logoColor=white" alt="Ollama">
+  <img src="https://img.shields.io/badge/Faster--Whisper-ASR_Offline-1E1E2E?style=for-the-badge&logo=openai&logoColor=10A37F" alt="Faster-Whisper">
+  <img src="https://img.shields.io/badge/License-MIT-1E1E2E?style=for-the-badge&logo=opensourceinitiative&logoColor=3DA639" alt="License MIT">
 </p>
 
 ---
@@ -32,15 +32,16 @@ El proyecto está estructurado en varios archivos independientes para aislar los
 | Módulo | Descripción Técnica |
 | :--- | :--- |
 | **`main.py`** | Núcleo visual construido con **CustomTkinter**. Gestiona los modos, la consola de logs y los hilos seguros de ejecución. |
-| **`audio_engine.py`** | Motor de reconocimiento de voz offline utilizando **Vosk** y `sounddevice` (carpeta `model-es`). |
-| **`ollama_client.py`** | Cliente de integración local con **Ollama** (`Qwen 2.5 Coder`), chat, ventana ampliada de **8192 tokens** (`num_ctx`), lectura de portapapeles (`pyperclip`) y autoevaluación. |
+| **`audio_engine.py`** | Motor de transcripción offline con **Faster-Whisper** (`int8`/`float16`), detección automática de silencio (VAD) con `sounddevice`/`numpy` y *prompting* de vocabulario técnico. |
+| **`gestor_voz.py`** | Gestor asíncrono de síntesis de voz (`GestorVozAsync`) con cola de frases en streaming en tiempo real, interrupción instantánea y aislamiento COM (`pyttsx3` / SAPI5). |
+| **`ollama_client.py`** | Cliente de integración local con **Ollama** (`Qwen 2.5 Coder`), chat en streaming, ventana ampliada de **8192 tokens** (`num_ctx`), lectura de portapapeles (`pyperclip`) y autoevaluación. |
 | **`acciones_pc.py`** | Automatización y control de ventanas de Windows mediante **PyAutoGUI** y comandos del sistema. |
 
 ---
 
 ## 🎯 Modos de Operación
 
-- **💬 Modo Charla**: Conversación fluida con la IA para resolución de dudas rápidas.
+- **💬 Modo Charla**: Conversación fluida y en streaming con la IA (con síntesis de voz frase a frase en tiempo real) para resolución de dudas rápidas.
 - **⚙️ Modo Asistente**: Control por voz de aplicaciones de Windows, carpetas y búsquedas web.
 - **💻 Modo Desarrollador (Copiloto)**: Captura tu código copiado en el portapapeles con `Ctrl + C`, lo procesa con Qwen 2.5 Coder usando 8k tokens de contexto y te devuelve el script limpio directamente al portapapeles listo para pegar en Android Studio.
 
@@ -51,9 +52,9 @@ El proyecto está estructurado en varios archivos independientes para aislar los
 1. Tener instalado **Python** y **Ollama** corriendo localmente (`http://localhost:11434`) con el modelo `qwen2.5-coder:7b`.
 2. Instalar las dependencias de Python necesarias ejecutando:
    ```bash
-   pip install customtkinter sounddevice vosk pyperclip pyautogui requests
+   pip install customtkinter faster-whisper numpy sounddevice pyttsx3 pywin32 pyperclip pyautogui requests
    ```
-3. Asegurarte de tener la carpeta con el modelo de voz offline (`model-es`) en el directorio raíz.
+3. *(Opcional)* En el primer arranque, **Faster-Whisper** descargará y guardará en caché local el modelo `small` automáticamente; a partir de ahí funcionará **100% offline** (`local_files_only=True`).
 4. Arrancar el taller ejecutando:
    ```bash
    python main.py
@@ -64,13 +65,13 @@ El proyecto está estructurado en varios archivos independientes para aislar los
 ## 📂 Estructura del Proyecto
 
 ```text
-Asistente-Modular-Taller/
+Asistente-Modular/
 │
 ├── 📄 main.py              # Núcleo visual (CustomTkinter)
-├── 📄 audio_engine.py      # Motor de voz offline (Vosk)
+├── 📄 audio_engine.py      # Reconocimiento de voz offline (Faster-Whisper + VAD)
+├── 📄 gestor_voz.py        # Cola asíncrona de voz y streaming TTS (pyttsx3 / SAPI5)
 ├── 📄 ollama_client.py     # Conexión local con Ollama (Qwen 2.5 Coder)
 ├── 📄 acciones_pc.py       # Automatización de Windows (PyAutoGUI)
-├── 📁 model-es/            # Carpeta con el modelo de voz en español de Vosk
 └── 📄 README.md            # Documentación oficial del taller
 ```
 
@@ -91,13 +92,23 @@ cd Asistente-Modular
 
 <div align="center">
 
-> **Proyecto creado y mantenido con pasión por [Jaypsmall](https://github.com/Jaypsmall)**  
-> *Desarrollo modular open-source para entornos de alta eficiencia.*
+<h3>👨‍💻 Autoría y Colaboración</h3>
 
-[![GitHub Profile](https://img.shields.io/badge/GitHub-Jaypsmall-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Jaypsmall)
-[![Pull Requests Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen.svg?style=for-the-badge&logo=git&logoColor=white)](https://github.com/Jaypsmall/Asistente-Modular/pulls)
+<p>
+  Proyecto creado y mantenido por <a href="https://github.com/Jaypsmall"><b>Jaypsmall</b></a><br>
+  <i>Desarrollo modular open-source para entornos de alta eficiencia.</i>
+</p>
 
-*¡Las pull requests, optimizaciones de hilos y nuevas herramientas para este asistente offline son totalmente bienvenidas!* 🚀
+<a href="https://github.com/Jaypsmall">
+  <img src="https://img.shields.io/badge/GitHub-Jaypsmall-0D1117?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Jaypsmall">
+</a>
+&nbsp;
+<a href="https://github.com/Jaypsmall/Asistente-Modular/pulls">
+  <img src="https://img.shields.io/badge/Contribuciones-Pull_Requests-0D1117?style=for-the-badge&logo=git&logoColor=F05032" alt="Pull Requests">
+</a>
+
+<br><br>
+<sub><i>¡Las pull requests, optimizaciones de hilos y nuevas herramientas para este asistente offline son totalmente bienvenidas! 🚀</i></sub>
 
 </div>
 
@@ -106,3 +117,5 @@ cd Asistente-Modular
 ## 📄 Licencia
 
 Este proyecto se distribuye bajo los términos de la licencia **MIT**. Siéntete libre de usarlo, modificarlo y adaptarlo a tus necesidades en el taller.
+
+
