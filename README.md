@@ -1,6 +1,27 @@
-# 🛠️ Taller Central - Asistente Modular Offline (Windows)  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/windows8/windows8-original.svg" height="60" alt="Windows" />
+# 🛠️ Taller Central - Asistente Modular Offline (Windows) 
 
 Asistente de escritorio modular, 100% offline y diseñado para entornos de desarrollo de alto rendimiento en Windows (optimizado para equipos con 16 GB de RAM), utilizando modelos locales para mantener total privacidad y escapar de bloqueos de API en la nube.
+
+<table width="100%">
+  <tr>
+    <td align="left" width="70%">
+      <img src="https://github.com/Jaypsmall/Asistente-Modular/blob/040c702c1aed6295f9b0f644d4c3341c173a0862/assets/interfaz.jpg" width="100%" alt="Interfaz Taller Central">
+    </td>
+    <td align="center" width="30%">
+      <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/windows8/windows8-original.svg" width="55%" alt="Windows">
+      <br><br>
+      <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" width="55%" alt="Python">
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/CustomTkinter-UI-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="CustomTkinter">
+  <img src="https://img.shields.io/badge/Ollama-Local_AI-121212?style=for-the-badge&logo=ollama&logoColor=white" alt="Ollama">
+  <img src="https://img.shields.io/badge/Vosk-Speech_Offline-FF6F00?style=for-the-badge&logo=speaker&logoColor=white" alt="Vosk">
+  <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License MIT">
+</p>
 
 ---
 
@@ -8,10 +29,12 @@ Asistente de escritorio modular, 100% offline y diseñado para entornos de desar
 
 El proyecto está estructurado en varios archivos independientes para aislar los hilos en segundo plano y evitar que fallos de hardware o audio congelen la interfaz gráfica:
 
-1. **`main.py`**: Núcleo visual construido con **CustomTkinter**. Gestiona los modos, la consola de logs y los hilos seguros de ejecución.
-2. **`audio_engine.py`**: Motor de reconocimiento de voz offline utilizando **Vosk** y `sounddevice` (carpeta `model-es`).
-3. **`ollama_client.py`**: Cliente de integración local con **Ollama** (`Qwen 2.5 Coder`), soporte para chat, ventana de contexto ampliada de **8192 tokens** (`num_ctx`), lectura automática del portapapeles (`pyperclip`) y autoevaluación de scripts limpios.
-4. **`acciones_pc.py`**: Automatización y control de ventanas de Windows mediante **PyAutoGUI** y comandos del sistema.
+| Módulo | Descripción Técnica |
+| :--- | :--- |
+| **`main.py`** | Núcleo visual construido con **CustomTkinter**. Gestiona los modos, la consola de logs y los hilos seguros de ejecución. |
+| **`audio_engine.py`** | Motor de reconocimiento de voz offline utilizando **Vosk** y `sounddevice` (carpeta `model-es`). |
+| **`ollama_client.py`** | Cliente de integración local con **Ollama** (`Qwen 2.5 Coder`), chat, ventana ampliada de **8192 tokens** (`num_ctx`), lectura de portapapeles (`pyperclip`) y autoevaluación. |
+| **`acciones_pc.py`** | Automatización y control de ventanas de Windows mediante **PyAutoGUI** y comandos del sistema. |
 
 ---
 
@@ -27,53 +50,56 @@ El proyecto está estructurado en varios archivos independientes para aislar los
 
 1. Tener instalado **Python** y **Ollama** corriendo localmente (`http://localhost:11434`) con el modelo `qwen2.5-coder:7b`.
 2. Instalar las dependencias de Python necesarias ejecutando:
-   `pip install customtkinter sounddevice vosk pyperclip pyautogui requests`
+   ```bash
+   pip install customtkinter sounddevice vosk pyperclip pyautogui requests
+   ```
 3. Asegurarte de tener la carpeta con el modelo de voz offline (`model-es`) en el directorio raíz.
 4. Arrancar el taller ejecutando:
-   `python main.py`
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" height="60" alt="Python" />
-  &nbsp;&nbsp;
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/windows8/windows8-original.svg" height="60" alt="Windows" />
-  &nbsp;&nbsp;
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/ollama/ollama-original.svg" height="60" alt="Ollama" />
-</p>
+   ```bash
+   python main.py
+   ```
 
 ---
 
 ## 📂 Estructura del Proyecto
 
-Así es como debe organizarse el carpetado en tu PC para que todos los módulos se comuniquen perfectamente:
-
 ```text
 Asistente-Modular-Taller/
 │
-├── main.py              # Núcleo visual (CustomTkinter)
-├── audio_engine.py      # Motor de voz offline (Vosk)
-├── ollama_client.py     # Conexión local con Ollama (Qwen 2.5 Coder)
-├── acciones_pc.py       # Automatización de Windows (PyAutoGUI)
-├── model-es/            # Carpeta con el modelo de voz en español de Vosk
-└── README.md            # Documentación oficial del taller
+├── 📄 main.py              # Núcleo visual (CustomTkinter)
+├── 📄 audio_engine.py      # Motor de voz offline (Vosk)
+├── 📄 ollama_client.py     # Conexión local con Ollama (Qwen 2.5 Coder)
+├── 📄 acciones_pc.py       # Automatización de Windows (PyAutoGUI)
+├── 📁 model-es/            # Carpeta con el modelo de voz en español de Vosk
+└── 📄 README.md            # Documentación oficial del taller
 ```
 
 ---
 
 ## 📥 Clonar el Repositorio
 
-Si quieres clonar este taller directamente en el PC de tu estación de trabajo, abre tu terminal y ejecuta:
+Si quieres clonar este taller directamente en tu estación de trabajo, abre tu terminal y ejecuta:
 
-```text
-git clone https://github.com/illoquediC/Asistente-Modular.git
+```bash
+git clone [https://github.com/Jaypsmall/Asistente-Modular.git](https://github.com/Jaypsmall/Asistente-Modular.git)
 cd Asistente-Modular
 ```
+
 ---
 
-## 👨‍💻 Desarrollado por
+## 👨‍💻 Autoría y Colaboración
 
-Creado y mantenido por **Jaypsmall** ([GitHub](https://github.com/Jaypsmall)). 
+<div align="center">
 
-¡El proyecto es de código abierto y totalmente modular! Si eres desarrollador y quieres meterle mejoras, optimizar hilos o implementar nuevas herramientas a este asistente offline, las pull requests y colaboraciones son totalmente bienvenidas. 🚀
+> **Proyecto creado y mantenido con pasión por [Jaypsmall](https://github.com/Jaypsmall)**  
+> *Desarrollo modular open-source para entornos de alta eficiencia.*
+
+[![GitHub Profile](https://img.shields.io/badge/GitHub-Jaypsmall-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Jaypsmall)
+[![Pull Requests Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen.svg?style=for-the-badge&logo=git&logoColor=white)](https://github.com/Jaypsmall/Asistente-Modular/pulls)
+
+*¡Las pull requests, optimizaciones de hilos y nuevas herramientas para este asistente offline son totalmente bienvenidas!* 🚀
+
+</div>
 
 ---
 
