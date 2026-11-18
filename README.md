@@ -88,11 +88,9 @@ cd Asistente-Modular
 
 ---
 
-## 👨‍💻 Autoría y Colaboración
-
 <div align="center">
 
-<h3>👨‍💻 Autoría y Colaboración</h3>
+# 👨‍💻 Autoría y Colaboración
 
 <p>
   Proyecto creado y mantenido por <a href="https://github.com/Jaypsmall"><b>Jaypsmall</b></a><br>
@@ -106,7 +104,6 @@ cd Asistente-Modular
 <a href="https://github.com/Jaypsmall/Asistente-Modular/pulls">
   <img src="https://img.shields.io/badge/Contribuciones-Pull_Requests-0D1117?style=for-the-badge&logo=git&logoColor=F05032" alt="Pull Requests">
 </a>
-
 <br><br>
 <sub><i>¡Las pull requests, optimizaciones de hilos y nuevas herramientas para este asistente offline son totalmente bienvenidas! 🚀</i></sub>
 
