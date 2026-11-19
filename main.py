@@ -1,11 +1,17 @@
+import queue
+import re
 import threading
 import time
+from pathlib import Path
+from tkinter import filedialog, messagebox
+
 import customtkinter as ctk
 
 from acciones_pc import ejecutar_accion_pc
 from audio_engine import MotorAudio
 from gestor_voz import GestorVozAsync
 from ollama_client import ClienteOllama
+from pdf_engine import aplicar_valores, campos_para_ia, inspeccionar_pdf
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
@@ -23,6 +29,10 @@ class AsistenteModularTallerPro(ctk.CTk):
         self.escuchando = False
         self.modo_actual = "desarrollador"
         self.velocidad_voz = 140
+        self.ruta_pdf_actual = None
+        self._cola_ui = queue.Queue()
+        self._cerrando = False
+        self._lock_orden = threading.Lock()
 
         # Instanciar motores externos
         self.audio = MotorAudio()
@@ -39,6 +49,7 @@ class AsistenteModularTallerPro(ctk.CTk):
 
         self._construir_sidebar()
         self._construir_area_principal()
+        self.after(50, self._procesar_cola_ui)
 
         self.log("Sistema inicializado. Selecciona un modo en el panel izquierdo y pulsa 'INICIAR SISTEMA'.", "sistema")
         self.protocol("WM_DELETE_WINDOW", self.al_cerrar)
@@ -117,6 +128,19 @@ class AsistenteModularTallerPro(ctk.CTk):
             font=ctk.CTkFont(size=13),
         )
         self.btn_charla.pack(fill="x", padx=15, pady=4)
+
+        self.btn_pdf = ctk.CTkButton(
+            self.sidebar,
+            text="📄  Modo Rellenar PDF",
+            command=self.seleccionar_pdf,
+            fg_color="transparent",
+            hover_color="#2b2f38",
+            anchor="w",
+            height=38,
+            corner_radius=8,
+            font=ctk.CTkFont(size=13),
+        )
+        self.btn_pdf.pack(fill="x", padx=15, pady=4)
 
         # Separador visual
         ctk.CTkFrame(self.sidebar, height=2, fg_color="#2b2f38").pack(fill="x", padx=15, pady=15)
@@ -310,7 +334,7 @@ class AsistenteModularTallerPro(ctk.CTk):
         self.modo_actual = nuevo_modo
 
         # Resetear estilos botones
-        for btn in (self.btn_charla, self.btn_asistente, self.btn_dev):
+        for btn in (self.btn_charla, self.btn_asistente, self.btn_dev, self.btn_pdf):
             btn.configure(fg_color="transparent", font=ctk.CTkFont(size=13))
 
         color_activo = "#1c7ed6"
@@ -323,8 +347,17 @@ class AsistenteModularTallerPro(ctk.CTk):
         elif nuevo_modo == "desarrollador":
             self.btn_dev.configure(fg_color="#1c7ed6", font=ctk.CTkFont(size=13, weight="bold"))
             color_activo = "#1c7ed6"
+        elif nuevo_modo == "pdf":
+            self.btn_pdf.configure(fg_color="#7048e8", font=ctk.CTkFont(size=13, weight="bold"))
+            color_activo = "#7048e8"
 
         self.barra_actividad.configure(progress_color=color_activo)
+        placeholder = (
+            "PDF seleccionado: escribe los datos que quieres introducir..."
+            if nuevo_modo == "pdf"
+            else "Escribe una orden aquí (o habla por el micrófono al iniciar)..."
+        )
+        self.entry_comando.configure(placeholder_text=placeholder)
         self.actualizar_hud_estado()
         self.log(f"\n[SISTEMA] Modo cambiado a: {nuevo_modo.upper()}", "sistema")
         self.hablar(f"Modo {nuevo_modo} activado.")
@@ -354,6 +387,33 @@ class AsistenteModularTallerPro(ctk.CTk):
     def hablar(self, texto):
         self.voz.decir_directo(texto)
 
+    def _encolar_ui(self, funcion, *args):
+        if not self._cerrando:
+            self._cola_ui.put((funcion, args))
+
+    def _procesar_cola_ui(self):
+        """Ejecuta en el hilo de Tk los cambios solicitados por workers."""
+        if self._cerrando:
+            return
+
+        while True:
+            try:
+                funcion, args = self._cola_ui.get_nowait()
+            except queue.Empty:
+                break
+            try:
+                funcion(*args)
+            except Exception as e:
+                self._insertar_log(f"[Error de interfaz]: {e}", "error")
+
+        self.after(50, self._procesar_cola_ui)
+
+    def _insertar_log(self, mensaje, tipo="normal"):
+        self.txt_log.configure(state="normal")
+        self.txt_log.insert("end", f"{mensaje}\n", tipo)
+        self.txt_log.see("end")
+        self.txt_log.configure(state="disabled")
+
     def log(self, mensaje, tipo="normal"):
         # Autodetección de color si viene desde callbacks externos
         if tipo == "normal":
@@ -366,13 +426,23 @@ class AsistenteModularTallerPro(ctk.CTk):
             elif "===" in mensaje or "[" in mensaje:
                 tipo = "sistema"
 
-        def _insertar():
-            self.txt_log.configure(state="normal")
-            self.txt_log.insert("end", f"{mensaje}\n", tipo)
-            self.txt_log.see("end")
-            self.txt_log.configure(state="disabled")
+        self._encolar_ui(self._insertar_log, mensaje, tipo)
 
-        self.after(0, _insertar)
+    def seleccionar_pdf(self):
+        ruta = filedialog.askopenfilename(
+            parent=self,
+            title="Selecciona un PDF con formulario",
+            filetypes=[("Documentos PDF", "*.pdf")],
+        )
+        if not ruta:
+            return
+
+        self.ruta_pdf_actual = Path(ruta)
+        self.cambiar_modo("pdf")
+        self.log(
+            f"PDF seleccionado: {self.ruta_pdf_actual.name}. Escribe los datos que quieres introducir.",
+            "sistema",
+        )
 
     def iniciar_asistente(self):
         self.escuchando = True
@@ -399,6 +469,7 @@ class AsistenteModularTallerPro(ctk.CTk):
         self.hablar("Asistente detenido.")
 
     def al_cerrar(self):
+        self._cerrando = True
         self.escuchando = False
         self.voz.apagar()
         self.destroy()
@@ -410,22 +481,54 @@ class AsistenteModularTallerPro(ctk.CTk):
         texto = self.entry_comando.get().strip()
         if not texto:
             return
+        if not self._lock_orden.acquire(blocking=False):
+            self.log("⚠️ Espera a que termine la orden actual.", "error")
+            return
+
         self.entry_comando.delete(0, "end")
-        threading.Thread(target=self._procesar_orden, args=(texto, True), daemon=True).start()
+        self.btn_enviar.configure(state="disabled")
+        threading.Thread(
+            target=self._procesar_orden_reservado,
+            args=(texto, True),
+            daemon=True,
+        ).start()
+
+    def _procesar_orden_reservado(self, texto, es_manual):
+        try:
+            self._procesar_orden(texto, es_manual)
+        except Exception as e:
+            self.log(f"[Error procesando orden]: {e}", "error")
+            self.hablar("Hubo un error procesando la orden.")
+        finally:
+            self._lock_orden.release()
+            if es_manual:
+                self._encolar_ui(self._habilitar_envio)
+
+    def _habilitar_envio(self):
+        self.btn_enviar.configure(state="normal")
 
     def _confirmar_orden_voz(self, orden_detectada):
         self.log(f"❓ ¿Confirmar orden?: '{orden_detectada}'", "sistema")
         self.hablar(f"He entendido: {orden_detectada}. ¿Lo lanzo o cancelo?")
 
-        time.sleep(0.3)
+        # Esperar a que el sintetizador termine de hablar por completo
         while self.voz.esta_hablando() and self.escuchando:
             time.sleep(0.1)
+
+        # Cojín de silencio para que el eco de los altavoces muera en la habitación
+        time.sleep(0.8)
 
         if not self.escuchando:
             return False
 
         respuesta = self.audio.escuchar_frase(duracion=4).lower().strip()
         self.log(f"🎙️ Confirmación: '{respuesta}'", "usuario")
+
+        # Filtro de seguridad anti-ruido / anti-youtube
+        palabras_basura = ("vídeo", "suscríbete", "baila", "youtube", "próximo", "gracias")
+        if not respuesta or any(basura in respuesta for basura in palabras_basura):
+            self.log("⚠️ Detectado audio residual/externo. Ignorando.", "error")
+            return False
 
         palabras_si = ("sí", "si", "dale", "confirma", "confirmar", "adelante", "vale", "ok", "lanza", "ejecuta")
         if any(p in respuesta.split() or p in respuesta for p in palabras_si) and "no" not in respuesta.split():
@@ -444,20 +547,24 @@ class AsistenteModularTallerPro(ctk.CTk):
 
         if "apagar sistema" in texto_lower or "apagar asistente" in texto_lower:
             self.hablar("Apagando el taller.")
-            self.after(0, self.detener_asistente)
+            self._encolar_ui(self.detener_asistente)
             return
 
         # Cambio de modo por comando
         if any(f in texto_lower for f in ("modo charla", "pasa a charla", "cambia a charla", "activar charla")):
-            self.after(0, lambda: self.cambiar_modo("charla"))
+            self._encolar_ui(self.cambiar_modo, "charla")
             return
 
         if any(f in texto_lower for f in ("modo asistente", "pasa a asistente", "cambia a asistente", "activar asistente")):
-            self.after(0, lambda: self.cambiar_modo("asistente"))
+            self._encolar_ui(self.cambiar_modo, "asistente")
             return
 
         if any(f in texto_lower for f in ("modo dev", "modo desarrollador", "pasa a dev", "cambia a desarrollador", "activar desarrollo")):
-            self.after(0, lambda: self.cambiar_modo("desarrollador"))
+            self._encolar_ui(self.cambiar_modo, "desarrollador")
+            return
+
+        if any(f in texto_lower for f in ("modo pdf", "modo formulario", "rellenar pdf", "rellenar formulario")):
+            self._encolar_ui(self.seleccionar_pdf)
             return
 
         # Enrutamiento según modo
@@ -496,7 +603,215 @@ class AsistenteModularTallerPro(ctk.CTk):
                 self.log(f"⚠️ {contenido}", "error")
                 self.hablar("Hubo un fallo generando el código.")
 
+        elif self.modo_actual == "pdf":
+            self._procesar_relleno_pdf(texto, es_manual)
+
+    def _procesar_relleno_pdf(self, instruccion, es_manual=False):
+        ruta_pdf = self.ruta_pdf_actual
+        if not ruta_pdf or not ruta_pdf.is_file():
+            self.log("⚠️ Selecciona primero un PDF con el botón del modo PDF.", "error")
+            return
+
+        self.log("[PDF] Leyendo campos y preparando el rellenado…", "sistema")
+        try:
+            campos, texto_documento = inspeccionar_pdf(ruta_pdf)
+            campos_ia = campos_para_ia(campos, instruccion)
+            secciones = {campo.get("seccion") for campo in campos_ia}
+            secciones.discard("")
+            menciona_interesado = bool(
+                re.search(r"\binteresad[oa]s?\b", instruccion, re.IGNORECASE)
+            )
+            menciona_representante = bool(
+                re.search(r"\brepresentantes?\b", instruccion, re.IGNORECASE)
+            )
+
+            if {"INTERESADO", "REPRESENTANTE"}.issubset(secciones):
+                secciones_elegidas = None
+                if menciona_interesado and menciona_representante:
+                    secciones_elegidas = {"INTERESADO", "REPRESENTANTE"}
+                elif menciona_interesado:
+                    secciones_elegidas = {"INTERESADO"}
+                elif menciona_representante:
+                    secciones_elegidas = {"REPRESENTANTE"}
+                else:
+                    seccion_elegida = self._preguntar_seccion_pdf(es_manual)
+                    if not seccion_elegida:
+                        self.log(
+                            "[PDF] Rellenado cancelado: no se eligió Interesado o Representante.",
+                            "sistema",
+                        )
+                        return
+                    secciones_elegidas = {seccion_elegida}
+                    instruccion += f"\nSección elegida por el usuario: {seccion_elegida}."
+
+                campos_ia = [
+                    campo
+                    for campo in campos_ia
+                    if campo.get("seccion") in secciones_elegidas
+                ]
+                self.log(
+                    "[PDF] Secciones elegidas: " + ", ".join(sorted(secciones_elegidas)) + ".",
+                    "sistema",
+                )
+
+            if not campos_ia:
+                raise ValueError(
+                    "No encontré campos de texto con etiquetas claras para estos datos. "
+                    "No se modificó el PDF."
+                )
+            self.log(
+                "[PDF] Propondré solo campos de texto con etiqueta clara y te mostraré la revisión antes de guardar.",
+                "sistema",
+            )
+
+            valores = self.ollama.consultar_relleno_pdf(
+                instruccion, campos_ia, texto_documento
+            )
+
+            # Solo se aceptan nombres que existan en el formulario seleccionado.
+            nombres_validos = {campo["nombre"] for campo in campos_ia}
+            valores = {
+                nombre: valor
+                for nombre, valor in valores.items()
+                if nombre in nombres_validos and isinstance(valor, str) and valor.strip()
+            }
+            if not valores:
+                raise ValueError(
+                    "La IA no pudo asociar los datos con campos de texto claros. "
+                    "No se modificó el PDF."
+                )
+
+            if not self._confirmar_relleno_pdf(campos_ia, valores):
+                self.log("[PDF] Rellenado cancelado; no se guardó ninguna copia.", "sistema")
+                return
+
+            destino = self._ruta_pdf_salida(ruta_pdf)
+            rellenados = aplicar_valores(ruta_pdf, destino, valores)
+            nombres = ", ".join(rellenados)
+            self.log(
+                f"✅ PDF rellenado ({nombres}) y guardado como: {destino}",
+                "ia",
+            )
+            self.hablar("Listo. He guardado una copia rellenada del PDF.")
+        except Exception as e:
+            self.log(f"⚠️ No se pudo rellenar el PDF: {e}", "error")
+            self.hablar("No pude rellenar ese PDF.")
+
+    def _preguntar_seccion_pdf(self, es_manual):
+        """Aclara a qué persona pertenecen los datos antes de pedir el mapeo a la IA."""
+        if not es_manual:
+            self.hablar(
+                "Este formulario tiene dos apartados, Interesado y Representante. "
+                "¿Dónde pongo los datos? Di Interesado o Representante."
+            )
+            limite = time.monotonic() + 30
+            while self.voz.esta_hablando() and not self._cerrando:
+                if time.monotonic() >= limite:
+                    break
+                time.sleep(0.1)
+
+            if not self._cerrando:
+                time.sleep(0.4)
+                try:
+                    respuesta = self.audio.escuchar_frase(duracion=5).strip()
+                except Exception as e:
+                    self.log(f"[PDF] No pude reconocer la respuesta por voz: {e}", "error")
+                    respuesta = ""
+                if respuesta:
+                    self.log(f"🎙️ Respuesta sobre el apartado: '{respuesta}'", "usuario")
+                    respuesta_lower = respuesta.casefold()
+                    if re.search(r"\binteresad[oa]s?\b", respuesta_lower):
+                        return "INTERESADO"
+                    if re.search(r"\brepresentantes?\b", respuesta_lower):
+                        return "REPRESENTANTE"
+
+        evento = threading.Event()
+        resultado = {"seccion": None}
+
+        def mostrar_pregunta():
+            try:
+                if self._cerrando:
+                    return
+                respuesta = messagebox.askyesnocancel(
+                    "¿En qué apartado van los datos?",
+                    "El PDF tiene dos casilleros: Interesado y Representante.\n\n"
+                    "Sí = Interesado\nNo = Representante\nCancelar = no rellenar",
+                    parent=self,
+                )
+                if respuesta is True:
+                    resultado["seccion"] = "INTERESADO"
+                elif respuesta is False:
+                    resultado["seccion"] = "REPRESENTANTE"
+            finally:
+                evento.set()
+
+        self._encolar_ui(mostrar_pregunta)
+        while not evento.wait(0.1):
+            if self._cerrando:
+                return None
+        return resultado["seccion"]
+
+    def _confirmar_relleno_pdf(self, campos, valores):
+        """Muestra la correspondencia propuesta y espera confirmación en la ventana."""
+        campos_por_nombre = {campo["nombre"]: campo for campo in campos}
+        lineas = []
+        for nombre, valor in valores.items():
+            campo = campos_por_nombre[nombre]
+            seccion = campo.get("seccion") or "Formulario"
+            etiqueta = campo.get("etiqueta") or nombre
+            lineas.append(f"{seccion} · {etiqueta}: {valor}")
+
+        evento = threading.Event()
+        resultado = {"confirmar": False}
+
+        def mostrar_confirmacion():
+            try:
+                if self._cerrando:
+                    return
+                mensaje = (
+                    "Comprueba que cada dato aparece en el campo correcto. "
+                    "Solo se guardará una copia nueva si eliges Sí.\n\n"
+                    + "\n".join(lineas)
+                )
+                resultado["confirmar"] = messagebox.askyesno(
+                    "Revisar el rellenado del PDF",
+                    mensaje,
+                    parent=self,
+                )
+            finally:
+                evento.set()
+
+        self._encolar_ui(mostrar_confirmacion)
+        while not evento.wait(0.1):
+            if self._cerrando:
+                return False
+        return resultado["confirmar"]
+
+    @staticmethod
+    def _ruta_pdf_salida(ruta_origen):
+        base = ruta_origen.with_name(f"{ruta_origen.stem}_relleno{ruta_origen.suffix}")
+        if not base.exists():
+            return base
+
+        numero = 2
+        while True:
+            candidata = ruta_origen.with_name(
+                f"{ruta_origen.stem}_relleno_{numero}{ruta_origen.suffix}"
+            )
+            if not candidata.exists():
+                return candidata
+            numero += 1
+
     def bucle_principal_escucha(self):
+        if not self.audio.modelo_cargado:
+            self.log("[Audio] Preparando Faster-Whisper en segundo plano…", "sistema")
+            try:
+                self.audio.preparar()
+            except Exception as e:
+                self.log(f"[Error cargando Faster-Whisper]: {e}", "error")
+                self._encolar_ui(self.detener_asistente)
+                return
+
         while self.escuchando:
             try:
                 if self.voz.esta_hablando():
@@ -507,7 +822,10 @@ class AsistenteModularTallerPro(ctk.CTk):
                 if not self.escuchando or not texto.strip():
                     continue
 
-                self._procesar_orden(texto, es_manual=False)
+                if self._lock_orden.acquire(blocking=False):
+                    self._procesar_orden_reservado(texto, es_manual=False)
+                else:
+                    self.log("⚠️ Ignoré la orden de voz porque hay otra en curso.", "sistema")
 
             except Exception as e:
                 self.log(f"[Aviso de Hilo - Recuperado]: {e}", "error")

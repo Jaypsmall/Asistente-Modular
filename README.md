@@ -21,6 +21,27 @@ Asistente de escritorio modular, 100% offline y diseñado para entornos de desar
 </table>
 
 
+<table width="100%">
+  <tr>
+    <td align="left" width="70%">
+      <img src="https://github.com/Jaypsmall/Asistente-Modular/blob/040c702c1aed6295f9b0f644d4c3341c173a0862/assets/interfaz.jpg" width="100%" alt="Interfaz">
+    </td>
+    <td align="center" width="30%">
+      <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/windows8/windows8-original.svg" width="70%" alt="Windows">
+      <br><br>
+      <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" width="70%" alt="Python">
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-1E1E2E?style=for-the-badge&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/Windows-10%2F11-1E1E2E?style=for-the-badge&logo=windows11" alt="Windows">
+  <img src="https://img.shields.io/badge/Ollama-Local_AI-1E1E2E?style=for-the-badge&logo=ollama&logoColor=white" alt="Ollama">
+  <img src="https://img.shields.io/badge/Faster--Whisper-ASR_Offline-1E1E2E?style=for-the-badge&logo=openai&logoColor=10A37F" alt="Faster-Whisper">
+  <img src="https://img.shields.io/badge/License-MIT-1E1E2E?style=for-the-badge&logo=opensourceinitiative&logoColor=3DA639" alt="License MIT">
+</p>
+
 ---
 
 ## 🚀 Arquitectura Modular (Anti-Crashes)
@@ -33,6 +54,7 @@ El proyecto está estructurado en varios archivos independientes para aislar los
 | **`audio_engine.py`** | Motor de transcripción offline con **Faster-Whisper** (`int8`/`float16`), detección automática de silencio (VAD) con `sounddevice`/`numpy` y *prompting* de vocabulario técnico. |
 | **`gestor_voz.py`** | Gestor asíncrono de síntesis de voz (`GestorVozAsync`) con cola de frases en streaming en tiempo real, interrupción instantánea y aislamiento COM (`pyttsx3` / SAPI5). |
 | **`ollama_client.py`** | Cliente de integración local con **Ollama** (`Qwen 2.5 Coder`), chat en streaming, ventana ampliada de **8192 tokens** (`num_ctx`), lectura de portapapeles (`pyperclip`) y autoevaluación. |
+| **`pdf_engine.py`**: Lee campos AcroForm, sincroniza datos XFA cuando existen y guarda una copia; conserva el original. |
 | **`acciones_pc.py`** | Automatización y control de ventanas de Windows mediante **PyAutoGUI** y comandos del sistema. |
 
 ---
@@ -41,7 +63,12 @@ El proyecto está estructurado en varios archivos independientes para aislar los
 
 - **💬 Modo Charla**: Conversación fluida y en streaming con la IA (con síntesis de voz frase a frase en tiempo real) para resolución de dudas rápidas.
 - **⚙️ Modo Asistente**: Control por voz de aplicaciones de Windows, carpetas y búsquedas web.
-- **💻 Modo Desarrollador (Copiloto)**: Captura tu código copiado en el portapapeles con `Ctrl + C`, lo procesa con Qwen 2.5 Coder usando 8k tokens de contexto y te devuelve el script limpio directamente al portapapeles listo para pegar en Android Studio.
+- **💻 Modo Desarrollador**: Puede usar el código del portapapeles como contexto y copia el resultado al portapapeles.
+- **📄 Modo Rellenar PDF**: Selecciona un PDF interactivo, dicta o escribe los datos, elige por voz o en pantalla entre secciones duplicadas como Interesado y Representante, revisa la correspondencia y confírmala antes de guardar una copia `nombre_relleno.pdf`.
+
+Cada modo de IA tiene instrucciones propias: desarrollo entrega código, charla responde para voz y PDF devuelve datos estructurados sin inventar información. El control del PC usa comandos directos.
+
+El modo PDF necesita campos interactivos AcroForm. Para evitar asignaciones dudosas, la IA solo propone campos de texto con etiquetas legibles; casillas y opciones quedan intactas. El PDF escaneado o plano requiere OCR y posicionamiento de texto.
 
 ---
 
@@ -57,6 +84,15 @@ El proyecto está estructurado en varios archivos independientes para aislar los
    ```bash
    python main.py
    ```
+
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" height="60" alt="Python" />
+  &nbsp;&nbsp;
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/windows8/windows8-original.svg" height="60" alt="Windows" />
+  &nbsp;&nbsp;
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/ollama/ollama-original.svg" height="60" alt="Ollama" />
+</p>
 
 ---
 
@@ -86,9 +122,11 @@ cd Asistente-Modular
 
 ---
 
+## 👨‍💻 Autoría y Colaboración
+
 <div align="center">
 
-# 👨‍💻 Autoría y Colaboración
+<h3>👨‍💻 Autoría y Colaboración</h3>
 
 <p>
   Proyecto creado y mantenido por <a href="https://github.com/Jaypsmall"><b>Jaypsmall</b></a><br>
@@ -102,6 +140,7 @@ cd Asistente-Modular
 <a href="https://github.com/Jaypsmall/Asistente-Modular/pulls">
   <img src="https://img.shields.io/badge/Contribuciones-Pull_Requests-0D1117?style=for-the-badge&logo=git&logoColor=F05032" alt="Pull Requests">
 </a>
+
 <br><br>
 <sub><i>¡Las pull requests, optimizaciones de hilos y nuevas herramientas para este asistente offline son totalmente bienvenidas! 🚀</i></sub>
 
