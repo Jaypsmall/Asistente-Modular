@@ -1,6 +1,25 @@
 # 🛠️ Taller Central - Asistente Modular Offline (Windows) 
 
-Asistente de escritorio modular, 100% offline y diseñado para entornos de desarrollo de alto rendimiento en Windows (optimizado para equipos con 16 GB de RAM), utilizando modelos locales para mantener total privacidad y escapar de bloqueos de API en la nube.
+Asistente de escritorio modular, 100% offline y diseñado para entornos de desarrollo de alto rendimiento en Windows (optimizado para equipos con 16 GB de RAM), utilizando modelos locales para mantener total privacidad y escapar de bloqueos de API en la nube. <img src="https://img.shields.io/badge/Python-3.10%2B-1E1E2E?style=icon&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/Windows-10%2F11-1E1E2E?style=icon&logo=windows11" alt="Windows">
+  <img src="https://img.shields.io/badge/Ollama-Local_AI-1E1E2E?style=icon&logo=ollama&logoColor=white" alt="Ollama">
+  <img src="https://img.shields.io/badge/Faster--Whisper-ASR_Offline-1E1E2E?style=icon&logo=openai&logoColor=10A37F" alt="Faster-Whisper">
+  <img src="https://img.shields.io/badge/License-MIT-1E1E2E?style=icon&logo=opensourceinitiative&logoColor=3DA639" alt="License MIT">
+</p>
+
+<table width="100%">
+  <tr>
+    <td align="left" width="70%">
+      <img src="https://github.com/Jaypsmall/Asistente-Modular/blob/040c702c1aed6295f9b0f644d4c3341c173a0862/assets/interfaz.jpg" width="100%" alt="Interfaz Taller Central">
+    </td>
+    <td align="center" width="30%">
+      <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/windows8/windows8-original.svg" width="55%" alt="Windows">
+      <br><br>
+      <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" width="55%" alt="Python">
+    </td>
+  </tr>
+</table>
+
 
 <table width="100%">
   <tr>
@@ -42,7 +61,7 @@ El proyecto está estructurado en varios archivos independientes para aislar los
 
 ## 🎯 Modos de Operación
 
-- **💬 Modo Charla**: Conversación fluida con la IA para resolución de dudas rápidas.
+- **💬 Modo Charla**: Conversación fluida y en streaming con la IA (con síntesis de voz frase a frase en tiempo real) para resolución de dudas rápidas.
 - **⚙️ Modo Asistente**: Control por voz de aplicaciones de Windows, carpetas y búsquedas web.
 - **💻 Modo Desarrollador**: Puede usar el código del portapapeles como contexto y copia el resultado al portapapeles.
 - **📄 Modo Rellenar PDF**: Selecciona un PDF interactivo, dicta o escribe los datos, elige por voz o en pantalla entre secciones duplicadas como Interesado y Representante, revisa la correspondencia y confírmala antes de guardar una copia `nombre_relleno.pdf`.
@@ -132,3 +151,5 @@ cd Asistente-Modular
 ## 📄 Licencia
 
 Este proyecto se distribuye bajo los términos de la licencia **MIT**. Siéntete libre de usarlo, modificarlo y adaptarlo a tus necesidades en el taller.
+
+
