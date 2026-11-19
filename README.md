@@ -1,6 +1,11 @@
 # 🛠️ Taller Central - Asistente Modular Offline (Windows) 
 
-Asistente de escritorio modular, 100% offline y diseñado para entornos de desarrollo de alto rendimiento en Windows (optimizado para equipos con 16 GB de RAM), utilizando modelos locales para mantener total privacidad y escapar de bloqueos de API en la nube.
+Asistente de escritorio modular, 100% offline y diseñado para entornos de desarrollo de alto rendimiento en Windows (optimizado para equipos con 16 GB de RAM), utilizando modelos locales para mantener total privacidad y escapar de bloqueos de API en la nube. <img src="https://img.shields.io/badge/Python-3.10%2B-1E1E2E?style=icon&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/Windows-10%2F11-1E1E2E?style=icon&logo=windows11" alt="Windows">
+  <img src="https://img.shields.io/badge/Ollama-Local_AI-1E1E2E?style=icon&logo=ollama&logoColor=white" alt="Ollama">
+  <img src="https://img.shields.io/badge/Faster--Whisper-ASR_Offline-1E1E2E?style=icon&logo=openai&logoColor=10A37F" alt="Faster-Whisper">
+  <img src="https://img.shields.io/badge/License-MIT-1E1E2E?style=icon&logo=opensourceinitiative&logoColor=3DA639" alt="License MIT">
+</p>
 
 <table width="100%">
   <tr>
@@ -15,13 +20,6 @@ Asistente de escritorio modular, 100% offline y diseñado para entornos de desar
   </tr>
 </table>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10%2B-1E1E2E?style=for-the-badge&logo=python" alt="Python">
-  <img src="https://img.shields.io/badge/Windows-10%2F11-1E1E2E?style=for-the-badge&logo=windows11" alt="Windows">
-  <img src="https://img.shields.io/badge/Ollama-Local_AI-1E1E2E?style=for-the-badge&logo=ollama&logoColor=white" alt="Ollama">
-  <img src="https://img.shields.io/badge/Faster--Whisper-ASR_Offline-1E1E2E?style=for-the-badge&logo=openai&logoColor=10A37F" alt="Faster-Whisper">
-  <img src="https://img.shields.io/badge/License-MIT-1E1E2E?style=for-the-badge&logo=opensourceinitiative&logoColor=3DA639" alt="License MIT">
-</p>
 
 ---
 
